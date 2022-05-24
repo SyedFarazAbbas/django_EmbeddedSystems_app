@@ -1,0 +1,314 @@
+#include <stdio.h>   // standard C library 
+#include <string.h>
+#include <stdlib.h>
+#include <math.h>
+
+#include "TM4C123.h" /* include register defintion file of TM4C123GH6PM */
+ 
+ 
+ 
+ 
+//========================================================================s 
+#define LCD_RS (*((volatile unsigned long *)0x40004020)) //RS - PA3
+#define lcdEN (*((volatile unsigned long *)0x40004010)) //EN - PA2
+#define LCD_DATA (*((volatile unsigned long *)0x400050F0)) //DB4-7 are mapped to PB2-5
+//Defines for PortA
+#define GPIO_PORTA_DIR_R        (*((volatile unsigned long *)0x40004400))
+#define GPIO_PORTA_AFSEL_R      (*((volatile unsigned long *)0x40004420))
+#define GPIO_PORTA_DEN_R        (*((volatile unsigned long *)0x4000451C))
+#define GPIO_PORTA_LOCK_R       (*((volatile unsigned long *)0x40004520))
+#define GPIO_PORTA_CR_R         (*((volatile unsigned long *)0x40004524))
+#define GPIO_PORTA_AMSEL_R      (*((volatile unsigned long *)0x40004528))
+#define GPIO_PORTA_PCTL_R       (*((volatile unsigned long *)0x4000452C))
+//Defines for PortB
+#define GPIO_PORTB_DATA_R       (*((volatile unsigned long *)0x400053FC))
+#define GPIO_PORTB_DIR_R        (*((volatile unsigned long *)0x40005400))
+#define GPIO_PORTB_AFSEL_R      (*((volatile unsigned long *)0x40005420))
+#define GPIO_PORTB_DEN_R        (*((volatile unsigned long *)0x4000551C))
+#define GPIO_PORTB_LOCK_R      (*((volatile unsigned long *)0x40005520))
+#define GPIO_PORTB_CR_R         (*((volatile unsigned long *)0x40005524))
+#define GPIO_PORTB_AMSEL_R      (*((volatile unsigned long *)0x40005528))
+#define GPIO_PORTB_PCTL_R       (*((volatile unsigned long *)0x4000552C))
+#define SYSCTL_RCGC2_R          (*((volatile unsigned long *)0x400FE108))
+//Define for delays
+#define delay4500ns 360 
+#define delay400us 3200
+#define delay50ms 400000
+#define delay150ms 1200000
+#define delay2000us 16000
+#define delay500ms 4000000
+#define delay1s 8000000
+//---------------------------------------------------------------------------
+
+//---------------------------------------------
+void Port_Init(void);
+void lcdENPulse(unsigned long time);
+void LCD_Cmd(unsigned char c);
+void LCD_Init(void);
+void LCD_Write_Char (char c);
+void LCD_String(char *string);
+void lcdGoto(unsigned char address);
+void LCD_Clear(void);
+void delay_ms(int n);
+void delay_us(int n);
+void Delay_ms(int n);
+//---------------------------------------------
+long val1=0,val2=0;
+unsigned char digits[5]={0};
+char factor = -1;
+unsigned int cnt = 1;
+void resetCalculation(int error_code){
+	
+	LCD_Clear();
+	switch(error_code){
+		case 1:
+			LCD_String("Limit exceed");
+		break;
+		
+	}
+	
+	delay_ms(1000);
+	LCD_Clear();
+	cnt = 1; val1=0;val2=0;factor=-1;
+}
+//===================================================================
+void LCD_Goto_XY ( unsigned char x, unsigned char y)
+{
+unsigned char row_start_address [] = {0x80 , 0xC0 };
+// Move cursor to (x,y) location on display
+LCD_Cmd (row_start_address [y -1] + x - 1);
+delay_ms(170);
+}
+ 
+int main(void){
+	unsigned int state=0,state2=0;
+
+	Port_Init();
+	LCD_Init(); 
+	
+	LCD_String("IR Dispense"); //Show prompt "Enter password"
+  LCD_Goto_XY(6,2);
+	LCD_String("Example");
+	delay_ms(4000);
+	//LCD_Clear(); //Clear screen
+	
+	GPIOF->DATA =  0;
+	 while(1)
+    {
+			int i=0;
+			 state = GPIOF->DATA & 0x10;
+			  if(state){
+					LCD_Goto_XY(1,2);
+					LCD_Write_Char('1');
+					GPIOF->DATA = 0;
+				}else{
+					LCD_Goto_XY(1,2);
+					LCD_Write_Char('0');					
+					GPIOF->DATA = 8;
+					 for(i=0; i<250; i++) // take 250 steps to complete one revolution 
+						{
+								// apply full drive clockwise rotation sequence 
+								GPIOF->DATA = 0x08;
+								Delay_ms(10);
+								GPIOF->DATA = 0x04;
+								Delay_ms(10);
+								GPIOF->DATA = 0x02;
+								Delay_ms(10);
+								GPIOF->DATA = 0x01;
+								Delay_ms(10);
+						}
+						
+						for(i=0; i<250; i++) // take 250 steps to complete one revolution 
+						{
+								// apply full drive clockwise rotation sequence 
+								GPIOF->DATA = 0x01;
+								Delay_ms(10);
+								GPIOF->DATA = 0x02;
+								Delay_ms(10);
+								GPIOF->DATA = 0x04;
+								Delay_ms(10);
+								GPIOF->DATA = 0x08;
+								Delay_ms(10);
+						}
+				}
+			 
+				
+				GPIOF->DATA |= (1<<0);
+				
+			//GPIOF->DATA = (~state>>3);    /* put it on red LED */
+			
+			/*
+			
+			 for(i=0; i<250; i++) // take 250 steps to complete one revolution 
+				{
+						// apply full drive clockwise rotation sequence 
+						GPIOF->DATA = 0x08;
+						Delay_ms(10);
+						GPIOF->DATA = 0x04;
+						Delay_ms(100);
+						GPIOF->DATA = 0x02;
+						Delay_ms(100);
+						GPIOF->DATA = 0x01;
+						Delay_ms(400);
+				}
+		*/
+    }
+	
+}//main ends here
+
+//=====================================================================
+//-----------------------------------------------------------
+void delay_ms(int n)
+{
+ int i,j;
+ for(i=0;i<n;i++)
+ for(j=0;j<3180;j++)
+ {}
+}
+
+/* Generates a delay in number of miliseocnds wit system clock of 16MHz */
+void Delay_ms(int n)
+{
+    int a, b;
+    for(a = 0 ; a < n; a++)
+        for(b = 0; b < 3180; b++)
+            {} /* execute NOP for one milisecond */
+}
+
+/* Micro seconds delay function */
+void delay_us(int n)
+{
+ int i,j;
+ for(i=0;i<n;i++)
+ for(j=0;j<3;j++)
+ {}
+ 
+}
+void Port_Init(void){
+	 
+	//Init for PortB
+	SYSCTL_RCGC2_R |= 0x00000002;     // 1) b clock
+//  delay = SYSCTL_RCGC2_R;           // delay   
+  GPIO_PORTB_CR_R |= 0x3C;           // allow changes to PB2-PB5       
+  GPIO_PORTB_AMSEL_R &= 0x00;        // 3) disable analog function
+  GPIO_PORTB_PCTL_R &= 0x00000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTB_DIR_R |= 0x3C;          // 5.2) PB2-PB5 as OUTPUTS
+  GPIO_PORTB_AFSEL_R &= 0x00;        // 6) no alternate function   
+  GPIO_PORTB_DEN_R |= 0x3C;          // 7) enable digital pins to PB2-PB5   
+	
+	//Init for PortA2-3
+  SYSCTL_RCGC2_R |= 0x00000001;     // 1) A clock
+ // delay = SYSCTL_RCGC2_R;           // delay   
+  GPIO_PORTA_CR_R |= 0x0C;           // allow changes to PA2-3       
+  GPIO_PORTA_AMSEL_R &= 0x00;        // 3) disable analog function
+  GPIO_PORTA_PCTL_R &= 0x00000000;   // 4) GPIO clear bit PCTL  
+  GPIO_PORTA_DIR_R |= 0x0C;          // 5.1) PA2-3 OUTPUTS
+  GPIO_PORTA_AFSEL_R &= 0x00;        // 6) no alternate function 
+  GPIO_PORTA_DEN_R |= 0x0C;          // 7) enable digital pins PA2-3    
+	
+	
+	  SYSCTL->RCGCGPIO |= 0x20;   /*Enable clock to PORTF */
+    
+    /* GPIOF->DATA PF3,PF2, PF1, PF0 pin initialization*/
+		GPIOF->LOCK = 0x4C4F434B;   // unlockGPIOCR register
+		GPIOF->CR = 0x01; // Enable GPIOPUR register enable to commit
+		GPIOF->PUR |= 0x11;        // Enable Pull Up resistor PF4
+    GPIOF->DIR |= 0x0F;         /* GPIOF->DATA  PF3,PF2, PF1, PF0as output */
+    GPIOF->DEN |= 0x0F;         /* GPIOF->DATA  PF3,PF2, PF1, PF0 as digital pins */
+		GPIOF->DIR |= 0x02;  //set PF1 as an output and PF4 as an input pin
+		GPIOF->DEN |= 0x12;  // Enable PF1 and PF4 as a digital GPIO pins 
+	
+	
+}
+void lcdENPulse(unsigned long time){ //set EN high for x time
+	lcdEN |= 0x04;
+	delay_us(time);
+	lcdEN &=~ 0x04; //return en to 0 
+}
+
+void LCD_Init(void) {
+	 
+ 
+
+	lcdEN =0x00<<2; //set enable to 0
+	LCD_DATA =0x00<<2; //set data to 0
+	delay_ms(50);
+	 
+	
+	LCD_RS=0x00<<2; //RS to 0
+	
+	LCD_DATA =0x3<<2; //waking up instructions
+  lcdENPulse(delay4500ns); //latch enable line for 450 ns
+	
+	delay_ms(50);
+ 
+	LCD_DATA =0x3<<2;
+	lcdENPulse(delay4500ns);
+	
+	delay_ms(2);
+ 
+	lcdENPulse(delay4500ns);
+	
+	delay_ms(2);
+	LCD_DATA =0x2<<2;	             
+  lcdENPulse(delay4500ns);
+	delay_ms(2);
+	
+	
+	//Data display lines are N = 0/1 <-> 1/2 lines, Data length DL = 0/1 <-> 4/8 bits, Character Font F = 0/1 <-> 5x8/5x10
+	//We need 4-bit data, 2 lines, 5x8 font (0,1,0)
+	//Cursor I/D to increment and display don't shift   
+
+	LCD_Cmd (0x02);delay_ms(50);  	/* 4bit mode */
+	LCD_Cmd (0x28);delay_ms(50); 	/* Initialization of 16X2 LCD in 4bit mode */
+	LCD_Cmd (0x0C);delay_ms(50);/* Display ON Cursor OFF */
+	LCD_Cmd (0x06);delay_ms(50);	/* Auto Increment cursor */
+	LCD_Cmd (0x01);delay_ms(50);	/* Clear display */
+	LCD_Cmd (0x80);delay_ms(50); 	/* Cursor at home position */
+ 
+}
+
+
+void LCD_Cmd(unsigned char c){     // function for setting commands
+
+	LCD_RS =0x00;	//line low
+	
+	delay_us(400);
+	
+	LCD_DATA=(c&0xF0)>>2;  //send first high nible to PB2-5
+	lcdENPulse(delay4500ns);
+
+	delay_ms(50);
+	
+	LCD_DATA=(c&0x0F)<<2;//set low niblle 
+	lcdENPulse(delay4500ns);
+
+	delay_ms(50);
+}
+void LCD_Write_Char (char c){   //function for setting data
+	LCD_RS =0x08;                   //RS on for sending data
+	delay_us(400);	
+	LCD_DATA=(c&0xF0)>>2; //high nibble	
+	lcdENPulse(delay4500ns);
+	delay_ms(1);
+	LCD_DATA=(c&0x0F)<<2; //low nibble	
+	lcdENPulse(delay4500ns);
+	delay_ms(1);
+	LCD_RS =0x00;
+}
+void lcdGoto(unsigned char address){	
+	LCD_Cmd(address); delay_ms(2);
+}
+ 
+void LCD_Clear(void){
+	LCD_Cmd(0x01); delay_ms(50); LCD_Cmd(0x00); //clear lcd
+	LCD_Cmd(0x02); delay_ms(50); LCD_Cmd(0x00); //"Home" LCD
+}
+void LCD_String(char *string) {//function for writing strings
+while(*string) {
+	LCD_Write_Char(*string);
+	string++;
+	}
+}            
+//================================================================
+

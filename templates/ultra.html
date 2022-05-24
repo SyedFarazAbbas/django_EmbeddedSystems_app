@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %} Stepper Motor {% endblock title %}
+
+{% block body %}
+<div class='container my-4'>
+    <p class="h4 text-center">"Stepper motor INTERFACING"</p>
+    <div class='container my-4'>
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="/static/irr.jpeg" class="d-block w-100" alt="...">
+          </div>
+         
+        </div>
+      </div>
+      <hr>
+      <h2>Objective</h2>
+      <br>
+      <ul> <b>1.</b> Objective is to set stepper motor on motion with the help of IR sensor.</ul>
+      <h1>Components required are given below:</h1>
+      <ul> <b>1.</b> Stepper Motor</ul>
+      <ul><b>2.</b> Tiva Launchpad</ul>
+      <ul><b>3.</b> Connecting wires</ul>
+      <ul><b>4.</b> Breadborad or vero board</ul>
+      <hr>
+      
+      
+      <hr>
+      <h2>Principle of Stepper motor</h2>
+      <p>
+        The stepper motor working principle is Electro-Magnetism. It includes a rotor which is made with a permanent magnet whereas a stator is with electromagnets. Once the supply is provided to the winding of the stator then the magnetic field will be developed within the stator. Now rotor in the motor will start to move with the rotating magnetic field of the stator. So this is the fundamental working principle of this motor.
+      </p>
+      <hr>
+      <h2>Applications</h2>
+      <p>Commercially, stepper motors are used in floppy disk drives, flatbed scanners, computer printers, plotters, slot machines, image scanners, compact disc drives, intelligent lighting, camera lenses, CNC machines, and 3D printers.</p>
+      <hr>
+
+      <h2>Download Code</h2>
+      <a href='/static/stepercode.txt'> <b>Click</b>  for Code</a>
+  
+      <hr>
+      {% endblock body %}

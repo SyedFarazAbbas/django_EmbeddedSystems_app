@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %} IR sensor interfacing{% endblock title %}
+
+{% block body %} 
+<div class='container my-4'>
+    <p class="h4 text-center">"Interfacing IR sensor with Tiva Launchpad"</p>
+    <div class='container my-4'>
+    <div id="carouselExampleSlidesOnly" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="/static/irr.jpeg" class="d-block w-100" alt="...">
+          </div>
+         
+        </div>
+      </div>
+      <hr>
+      <h2>Objective</h2>
+      <br>
+      <ul> <b>1.</b> Objective is to show 0 or 1 on LCD depending upon the motion of nearby object.</ul>
+  
+      <hr>
+      <h1>Components required are given below:</h1>
+      <ul><b>1.</b> Tiva Launchpad</ul>
+      <ul><b>2.</b> Connecting wires</ul>
+      <ul><b>3.</b> IR sensor</ul>
+      <ul><b>4.</b> Capacitors</ul>
+      <ul><b>5.</b> Voltage Regulator</ul>
+      <ul><b>6.</b> Character LCD</ul>
+      <hr>
+      <h2>
+        How IR sensor works?
+      </h2>
+      <p>How the IR sensor works is simple. First of all, IR led transmits light. We cannot see that light because its wavelength is higher than visible light wavelength. Light emitting angle of IR led is 20-60 degrees. Light emitting angle and intensity of light of led really depends upon type of IR sensor which we are using.
+        Then we have photodiode. Photodiode acts as an IR receiver because when light falls on it, it starts conducting current. Photodiode in that case is reverse biased. It is also important to understand that amount of current is directly proportional to amount of light which is falling on it.
+        So IR sensor works when something or some material approaches to it. When there is a motion in its vicinity then due to reflection of light and falling of that light on photodiode, it starts working.
+        </p>
+        <hr>
+        <h2>Applications</h2>
+        <ul><b>1.</b> It is used in Home automations.</ul>
+        <ul><b>2.</b> It is used to detect any burglar in proximity.</ul>
+        <ul><b>3.</b> It is used in metal detection.</ul>
+        <ul><b>4.</b>It is used in in gas leakage detection</ul>
+        <ul><b>5.</b> It is also used in climatology.</ul>
+       
+      
+
+
+
+      
+      <hr>
+
+              <h2>Download Code</h2>
+              <a href='/static/stepercode.txt'> <b>Click</b>  for Code</a>
+          
+              <hr>
+              
+
+
+{% endblock body %}
